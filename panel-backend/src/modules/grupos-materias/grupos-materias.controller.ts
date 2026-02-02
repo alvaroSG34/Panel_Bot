@@ -22,6 +22,48 @@ import { Roles, AuditTable } from '../../common/decorators';
 export class GruposMateriasController {
   constructor(private gruposMateriasService: GruposMateriasService) {}
 
+  // ==================== MATERIAS ====================
+  @Get('materias')
+  getAllMaterias() {
+    return this.gruposMateriasService.getAllMaterias();
+  }
+
+  @Post('materias')
+  @Roles('admin')
+  createMateria(@Body() data: { codigo_materia: string; nombre_materia: string }) {
+    return this.gruposMateriasService.createMateria(data);
+  }
+
+  @Delete('materias/:id')
+  @Roles('admin')
+  deleteMateria(@Param('id', ParseIntPipe) id: number) {
+    return this.gruposMateriasService.deleteMateria(id);
+  }
+
+  // ==================== GRUPOS ====================
+  @Get('grupos')
+  getAllGrupos() {
+    return this.gruposMateriasService.getAllGrupos();
+  }
+
+  @Post('grupos')
+  @Roles('admin')
+  createGrupo(@Body() data: { codigo_grupo: string }) {
+    return this.gruposMateriasService.createGrupo(data);
+  }
+
+  @Delete('grupos/:id')
+  @Roles('admin')
+  deleteGrupo(@Param('id', ParseIntPipe) id: number) {
+    return this.gruposMateriasService.deleteGrupo(id);
+  }
+
+  // ==================== MAPEOS ====================
+  @Get('mapeos')
+  getAllMapeos() {
+    return this.gruposMateriasService.getAllMapeos();
+  }
+
   @Get()
   findAll(@Query() query: QueryGrupoMateriaDto) {
     return this.gruposMateriasService.findAll(query);

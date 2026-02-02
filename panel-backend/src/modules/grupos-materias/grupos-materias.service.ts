@@ -234,4 +234,103 @@ export class GruposMateriasService {
       ),
     };
   }
+
+  // ==================== MATERIAS ====================
+  async getAllMaterias() {
+    return this.prisma.materias.findMany({
+      orderBy: { codigo_materia: 'asc' },
+    });
+  }
+
+  async createMateria(data: { codigo_materia: string; nombre_materia: string }) {
+    const existing = await this.prisma.materias.findUnique({
+      where: { codigo_materia: data.codigo_materia },
+    });
+
+    if (existing) {
+      throw new ConflictException(`Materia ${data.codigo_materia} ya existe`);
+    }
+
+    return this.prisma.materias.create({
+      data: {
+        codigo_materia: data.codigo_materia,
+        nombre: data.nombre_materia,
+      },
+    });
+  }
+
+  async deleteMateria(id: number) {
+    const materia = await this.prisma.materias.findUnique({ where: { id } });
+    if (!materia) {
+      throw new NotFoundException(`Materia con ID ${id} no encontrada`);
+    }
+
+    const hasMapeos = await this.prisma.grupo_materia.count({
+      where: { id_materia: id },
+    });
+
+    if (hasMapeos > 0) {
+      throw new ConflictException(
+        `No se puede eliminar: existen ${hasMapeos} grupos asociados`,
+      );
+    }
+
+    return this.prisma.materias.delete({ where: { id } });
+  }
+
+  // ==================== GRUPOS ====================
+  async getAllGrupos() {
+    return this.prisma.grupos.findMany({
+      orderBy: { codigo_grupo: 'asc' },
+    });
+  }
+
+  async createGrupo(data: { codigo_grupo: string }) {
+    const existing = await this.prisma.grupos.findUnique({
+      where: { codigo_grupo: data.codigo_grupo },
+    });
+
+    if (existing) {
+      throw new ConflictException(`Grupo ${data.codigo_grupo} ya existe`);
+    }
+
+    return this.prisma.grupos.create({
+      data: {
+        codigo_grupo: data.codigo_grupo,
+      },
+    });
+  }
+
+  async deleteGrupo(id: number) {
+    const grupo = await this.prisma.grupos.findUnique({ where: { id } });
+    if (!grupo) {
+      throw new NotFoundException(`Grupo con ID ${id} no encontrada`);
+    }
+
+    const hasMapeos = await this.prisma.grupo_materia.count({
+      where: { id_grupo: id },
+    });
+
+    if (hasMapeos > 0) {
+      throw new ConflictException(
+        `No se puede eliminar: existen ${hasMapeos} materias asociadas`,
+      );
+    }
+
+    return this.prisma.grupos.delete({ where: { id } });
+  }
+
+  // ==================== MAPEOS ====================
+  async getAllMapeos() {
+    return this.prisma.grupo_materia.findMany({
+      include: {
+        materias: true,
+        grupos: true,
+        semestres: true,
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+  }
 }
