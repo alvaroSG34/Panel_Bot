@@ -1,0 +1,26 @@
+{
+  "name": "panel-admin-bot-whatsapp",
+  "version": "1.0.0",
+  "description": "Panel administrativo para Bot de Inscripción WhatsApp con RBAC",
+  "type": "module",
+  "scripts": {
+    "create-admin": "node create-admin.js",
+    "check-users": "node check-users.js",
+    "check-schema": "node check-schema.js",
+    "test-auth": "node test-auth.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "admin",
+    "panel",
+    "rbac"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3",
+    "readline": "^1.3.0"
+  }
+}

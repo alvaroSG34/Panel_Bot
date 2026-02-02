@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model admin_commands {
+  id            Int            @id @default(autoincrement())
+  comando       tipo_comando
+  parametros    Json?
+  estado        estado_comando @default(pendiente)
+  resultado     Json?
+  bloqueado_por Int?
+  bloqueado_en  DateTime?      @db.Timestamp(6)
+  creado_por    Int?
+  creado_en     DateTime       @default(now()) @db.Timestamp(6)
+  ejecutado_en  DateTime?      @db.Timestamp(6)
+  usuarios      usuarios?      @relation(fields: [creado_por], references: [id], onUpdate: NoAction)
+
+  @@index([estado, creado_en], map: "idx_admin_commands_estado_creado")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model boleta_grupo {
+  id                    Int                   @id @default(autoincrement())
+  id_boleta             Int
+  id_grupo_materia      Int
+  estado_agregado       estado_agregado       @default(pendiente)
+  agregado_en           DateTime?             @db.Timestamp(6)
+  intentos              Int                   @default(0)
+  error_ultimo          String?
+  creado_en             DateTime              @default(now()) @db.Timestamp(6)
+  boletas_inscripciones boletas_inscripciones @relation(fields: [id_boleta], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  grupo_materia         grupo_materia         @relation(fields: [id_grupo_materia], references: [id], onUpdate: NoAction)
+
+  @@unique([id_boleta, id_grupo_materia])
+  @@index([id_boleta], map: "idx_boleta_grupo_boleta")
+  @@index([estado_agregado, id_boleta], map: "idx_boleta_grupo_estado_boleta")
+  @@index([id_grupo_materia], map: "idx_boleta_grupo_oferta")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model boletas_inscripciones {
+  id                  Int              @id @default(autoincrement())
+  id_estudiante       Int
+  id_semestre         Int
+  documento_hash      String           @unique @db.VarChar(64)
+  texto_raw           String?
+  datos_parseados     Json?
+  estado              estado_documento @default(pendiente)
+  id_mensaje_whatsapp String?          @db.VarChar(100)
+  fecha_subida        DateTime         @default(now()) @db.Timestamp(6)
+  confirmado_en       DateTime?        @db.Timestamp(6)
+  procesado_en        DateTime?        @db.Timestamp(6)
+  boleta_grupo        boleta_grupo[]
+  estudiantes         estudiantes      @relation(fields: [id_estudiante], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  semestres           semestres        @relation(fields: [id_semestre], references: [id], onUpdate: NoAction)
+
+  @@index([estado], map: "idx_boletas_estado")
+  @@index([id_estudiante], map: "idx_boletas_estudiante")
+  @@index([id_semestre], map: "idx_boletas_semestre")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model bot_heartbeat {
+  id              Int       @id @default(1)
+  ultima_conexion DateTime? @db.Timestamp(6)
+  estado_whatsapp String?   @db.VarChar(100)
+  version_bot     String?   @db.VarChar(20)
+  pid             Int?
+  hostname        String?   @db.VarChar(255)
+  grupos_cache    Json?
+  actualizado_en  DateTime  @default(now()) @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model estudiantes {
+  id                         Int                     @id @default(autoincrement())
+  numero_registro            String                  @unique @db.VarChar(20)
+  nombre_estudiante          String                  @db.VarChar(255)
+  id_whatsapp                String                  @unique @db.VarChar(50)
+  total_materias_registradas Int                     @default(0)
+  creado_en                  DateTime                @default(now()) @db.Timestamp(6)
+  actualizado_en             DateTime                @default(now()) @db.Timestamp(6)
+  boletas_inscripciones      boletas_inscripciones[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model grupo_materia {
+  id                 Int            @id @default(autoincrement())
+  id_semestre        Int
+  id_materia         Int
+  id_grupo           Int
+  jid_grupo_whatsapp String         @db.VarChar(100)
+  modalidad          String?        @db.VarChar(50)
+  horario            String?
+  activo             Boolean        @default(true)
+  version            Int            @default(0)
+  creado_en          DateTime       @default(now()) @db.Timestamp(6)
+  actualizado_en     DateTime       @default(now()) @db.Timestamp(6)
+  boleta_grupo       boleta_grupo[]
+  grupos             grupos         @relation(fields: [id_grupo], references: [id], onUpdate: NoAction)
+  materias           materias       @relation(fields: [id_materia], references: [id], onUpdate: NoAction)
+  semestres          semestres      @relation(fields: [id_semestre], references: [id], onUpdate: NoAction)
+
+  @@unique([id_semestre, id_materia, id_grupo])
+  @@unique([id_semestre, jid_grupo_whatsapp])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model grupos {
+  id             Int             @id @default(autoincrement())
+  codigo_grupo   String          @unique @db.VarChar(10)
+  creado_en      DateTime        @default(now()) @db.Timestamp(6)
+  actualizado_en DateTime        @default(now()) @db.Timestamp(6)
+  grupo_materia  grupo_materia[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model materias {
+  id             Int             @id @default(autoincrement())
+  codigo_materia String          @unique @db.VarChar(20)
+  nombre         String          @db.VarChar(255)
+  nivel          String?         @db.VarChar(50)
+  creado_en      DateTime        @default(now()) @db.Timestamp(6)
+  actualizado_en DateTime        @default(now()) @db.Timestamp(6)
+  grupo_materia  grupo_materia[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model semestres {
+  id                    Int                     @id @default(autoincrement())
+  codigo                String                  @unique @db.VarChar(20)
+  nombre                String?                 @db.VarChar(100)
+  fecha_inicio          DateTime?               @db.Date
+  fecha_fin             DateTime?               @db.Date
+  activo                Boolean                 @default(true)
+  creado_en             DateTime                @default(now()) @db.Timestamp(6)
+  actualizado_en        DateTime                @default(now()) @db.Timestamp(6)
+  boletas_inscripciones boletas_inscripciones[]
+  grupo_materia         grupo_materia[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model sesiones {
+  id                 Int      @id @default(autoincrement())
+  usuario_id         Int
+  refresh_token_hash String   @db.VarChar(255)
+  ip_address         String?  @db.VarChar(50)
+  user_agent         String?
+  expira_en          DateTime @db.Timestamp(6)
+  revocado           Boolean  @default(false)
+  creado_en          DateTime @default(now()) @db.Timestamp(6)
+  usuarios           usuarios @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([usuario_id], map: "idx_sesiones_usuario")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model sesiones_auditoria {
+  id              Int       @id @default(autoincrement())
+  usuario_id      Int?
+  accion          String    @db.VarChar(100)
+  tabla_afectada  String?   @db.VarChar(100)
+  registro_id     Int?
+  cambios_antes   Json?
+  cambios_despues Json?
+  ip_address      String?   @db.VarChar(50)
+  creado_en       DateTime  @default(now()) @db.Timestamp(6)
+  usuarios        usuarios? @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
+
+  @@index([tabla_afectada, creado_en(sort: Desc)], map: "idx_sesiones_auditoria_tabla_fecha")
+  @@index([usuario_id, creado_en(sort: Desc)], map: "idx_sesiones_auditoria_usuario_fecha")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model usuarios {
+  id                 Int                  @id @default(autoincrement())
+  username           String               @unique @db.VarChar(50)
+  password_hash      String               @db.VarChar(255)
+  email              String?              @db.VarChar(255)
+  role               rol_usuario          @default(operator)
+  activo             Boolean              @default(true)
+  version            Int                  @default(0)
+  creado_en          DateTime             @default(now()) @db.Timestamp(6)
+  actualizado_en     DateTime             @default(now()) @db.Timestamp(6)
+  admin_commands     admin_commands[]
+  sesiones           sesiones[]
+  sesiones_auditoria sesiones_auditoria[]
+}
+
+enum document_status {
+  pending
+  confirmed
+  processing
+  completed
+  failed
+  expired
+}
+
+enum estado_agregado {
+  pendiente
+  agregado
+  fallido
+}
+
+enum estado_comando {
+  pendiente
+  procesando
+  completado
+  fallido
+}
+
+enum estado_documento {
+  pendiente
+  confirmado
+  procesando
+  completado
+  fallido
+  expirado
+}
+
+enum rol_usuario {
+  admin
+  operator
+  auditor
+}
+
+enum tipo_comando {
+  retry_enrollment
+  refresh_groups
+  restart_bot
+}
