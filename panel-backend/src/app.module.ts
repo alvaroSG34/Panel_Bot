@@ -12,6 +12,8 @@ import { GruposMateriasModule } from './modules/grupos-materias/grupos-materias.
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AdminCommandsModule } from './modules/admin-commands/admin-commands.module';
 import { BotStatusModule } from './modules/bot-status/bot-status.module';
+import { LogsModule } from './modules/logs/logs.module';
+import { SeedingModule } from './modules/seeding/seeding.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard, SessionGuard } from './common/guards';
 import { AuditInterceptor } from './common/interceptors';
@@ -35,6 +37,8 @@ import { AuditInterceptor } from './common/interceptors';
     UsuariosModule,
     AdminCommandsModule,
     BotStatusModule,
+    LogsModule,
+    SeedingModule,
   ],
   controllers: [AppController],
   providers: [
