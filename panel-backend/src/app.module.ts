@@ -6,6 +6,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EstudiantesModule } from './modules/estudiantes/estudiantes.module';
+import { BoletasModule } from './modules/boletas/boletas.module';
+import { GruposMateriasModule } from './modules/grupos-materias/grupos-materias.module';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { AdminCommandsModule } from './modules/admin-commands/admin-commands.module';
+import { BotStatusModule } from './modules/bot-status/bot-status.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard, SessionGuard } from './common/guards';
 import { AuditInterceptor } from './common/interceptors';
@@ -23,6 +29,12 @@ import { AuditInterceptor } from './common/interceptors';
     ]),
     PrismaModule,
     AuthModule,
+    EstudiantesModule,
+    BoletasModule,
+    GruposMateriasModule,
+    UsuariosModule,
+    AdminCommandsModule,
+    BotStatusModule,
   ],
   controllers: [AppController],
   providers: [

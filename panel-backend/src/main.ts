@@ -9,6 +9,9 @@ async function bootstrap() {
   // Obtener ConfigService
   const configService = app.get(ConfigService);
 
+  // Prefijo global para todas las rutas
+  app.setGlobalPrefix('api');
+
   // Habilitar CORS
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGIN', 'http://localhost:5173'),

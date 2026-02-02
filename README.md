@@ -380,18 +380,26 @@ INF412,5A,120363333333333333@g.us,Presencial,Mar-Jue 14:00-16:00
 - [x] Proyecto NestJS inicializado con dependencias
 - [x] Configuración Prisma para introspección
 - [x] Modelos Prisma generados desde base de datos (12 models)
+- [x] **Auth module completo** (JWT + Sessions + Guards)
+- [x] **EstudiantesModule** - Read-only con stats y búsqueda
+- [x] **BoletasModule** - GET + cambio de estados (admin/operator)
+- [x] **GruposMateriasModule** - CRUD completo con optimistic locking
+- [x] **UsuariosModule** - CRUD + reset password + force logout
+- [x] **AdminCommandsModule** - Cola de comandos para bot (CRUD + requeue + stats)
+- [x] Todos los módulos registrados en app.module.ts
+- [x] .gitignore actualizado
 
 ### 🔄 Próximo
-- [ ] Implementar Auth module (JWT + Sessions + Guards)
-- [ ] Crear módulos de datos read-only
+- [ ] Testing de AdminCommands con test-admin-commands.js
+- [ ] BotStatusModule - Heartbeat y detección multi-instancia
+- [ ] LogsModule - Streaming SSE de logs del bot
+- [ ] Integración en bot: pollAdminCommands() + sendHeartbeat()
+- [ ] Crear datos de prueba (semestres, materias, grupos)
 - [ ] Inicializar React frontend con Vite
 
 ### 📅 Pendiente
-- [ ] Auth module (JWT + Sessions + Guards)
-- [ ] Read-only data modules
-- [ ] Admin CRUD con optimistic locking
-- [ ] CSV import wizard
-- [ ] Bot command polling en src/index.js
+- [ ] CSV import wizard (SeedingModule)
+- [ ] Bot command polling en src/index.js del bot
 - [ ] PM2 ecosystem config
 - [ ] Documentación de deployment
 

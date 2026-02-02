@@ -44,3 +44,15 @@ prisma/migrations/
 .cache/
 temp/
 tmp/
+
+# WhatsApp session files
+auth_info/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# PM2
+.pm2/
+ecosystem.config.js
+
+# Frontend build (si se sirve desde backend)
+panel-backend/public/
