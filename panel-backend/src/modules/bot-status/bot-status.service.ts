@@ -20,6 +20,7 @@ export class BotStatusService {
       pid,
       hostname,
       grupos_cache,
+      queueStats,
     } = updateHeartbeatDto;
 
     try {
@@ -33,6 +34,7 @@ export class BotStatusService {
           pid: pid || null,
           hostname: hostname || null,
           grupos_cache: grupos_cache ? (grupos_cache as Prisma.InputJsonValue) : Prisma.JsonNull,
+          queue_stats: queueStats ? (queueStats as Prisma.InputJsonValue) : Prisma.JsonNull,
           actualizado_en: new Date(),
         },
         create: {
@@ -43,6 +45,7 @@ export class BotStatusService {
           pid: pid || null,
           hostname: hostname || null,
           grupos_cache: grupos_cache ? (grupos_cache as Prisma.InputJsonValue) : Prisma.JsonNull,
+          queue_stats: queueStats ? (queueStats as Prisma.InputJsonValue) : Prisma.JsonNull,
           actualizado_en: new Date(),
         },
       });
@@ -91,6 +94,7 @@ export class BotStatusService {
       totalGroups: heartbeat.grupos_cache 
         ? Object.keys(heartbeat.grupos_cache as Record<string, any>).length 
         : 0,
+      queueStats: (heartbeat as any).queue_stats || null,
     };
   }
 

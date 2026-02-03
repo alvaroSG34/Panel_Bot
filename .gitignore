@@ -44,7 +44,7 @@ prisma/migrations/
 .cache/
 temp/
 tmp/
-
+Boletas/
 # WhatsApp session files
 auth_info/
 .wwebjs_auth/
