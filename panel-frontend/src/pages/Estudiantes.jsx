@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { 
   Box, Typography, Paper, IconButton, Dialog, DialogTitle, 
   DialogContent, DialogActions, Button, Grid, Table, TableBody, 
-  TableCell, TableContainer, TableHead, TableRow, Chip, Alert
+  TableCell, TableContainer, TableHead, TableRow, Chip, Alert, TextField
 } from '@mui/material'
 import { DataGrid, esES } from '@mui/x-data-grid'
-import { Visibility as VisibilityIcon, Launch as LaunchIcon } from '@mui/icons-material'
+import { Visibility as VisibilityIcon, Launch as LaunchIcon, Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material'
 import api from '../api/axios'
 
 const Estudiantes = () => {
@@ -17,11 +17,19 @@ const Estudiantes = () => {
   const [boletaDetailOpen, setBoletaDetailOpen] = useState(false)
   const [selectedBoleta, setSelectedBoleta] = useState(null)
   const [boletaDetailLoading, setBoletaDetailLoading] = useState(false)
+  
+  // Búsqueda
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
 
   useEffect(() => {
     const fetchEstudiantes = async () => {
       try {
-        const response = await api.get('/estudiantes')
+        // Construir query params
+        const params = new URLSearchParams()
+        if (searchTerm) params.append('search', searchTerm)
+        
+        const response = await api.get(`/estudiantes?${params.toString()}`)
         const estudiantesData = response.data?.data || response.data
         setEstudiantes(Array.isArray(estudiantesData) ? estudiantesData : [])
       } catch (error) {
@@ -35,7 +43,7 @@ const Estudiantes = () => {
     const interval = setInterval(fetchEstudiantes, 30000) // Poll cada 30s
 
     return () => clearInterval(interval)
-  }, [])
+  }, [searchTerm])
 
   const handleViewDetail = async (id) => {
     setDetailLoading(true)
@@ -116,9 +124,46 @@ const Estudiantes = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Estudiantes
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          Estudiantes
+        </Typography>
+        <Button
+          variant={showSearch ? "contained" : "outlined"}
+          startIcon={showSearch ? <ClearIcon /> : <SearchIcon />}
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          {showSearch ? 'Ocultar Búsqueda' : 'Buscar'}
+        </Button>
+      </Box>
+
+      {/* Panel de Búsqueda */}
+      {showSearch && (
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={10}>
+              <TextField
+                fullWidth
+                label="Buscar Estudiante"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por registro, nombre o WhatsApp ID..."
+              />
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => setSearchTerm('')}
+                sx={{ height: '56px' }}
+              >
+                Limpiar
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+      )}
+
       <Paper sx={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={estudiantes}

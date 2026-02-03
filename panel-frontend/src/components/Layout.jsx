@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Avatar, Menu, MenuItem } from '@mui/material'
-import { Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, Assignment as AssignmentIcon, Group as GroupIcon, Person as PersonIcon, Article as ArticleIcon, CloudUpload as CloudUploadIcon, Logout as LogoutIcon } from '@mui/icons-material'
+import { Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, Assignment as AssignmentIcon, Group as GroupIcon, Person as PersonIcon, Article as ArticleIcon, CloudUpload as CloudUploadIcon, Logout as LogoutIcon, MonitorHeart as MonitorHeartIcon } from '@mui/icons-material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -35,6 +35,7 @@ const Layout = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['admin', 'operator', 'auditor'] },
     { text: 'Estudiantes', icon: <PeopleIcon />, path: '/estudiantes', roles: ['admin', 'operator', 'auditor'] },
     { text: 'Inscripciones', icon: <AssignmentIcon />, path: '/inscripciones', roles: ['admin', 'operator', 'auditor'] },
+    { text: 'Monitor del Bot', icon: <MonitorHeartIcon />, path: '/bot-monitor', roles: ['admin', 'operator'] },
     { text: 'Grupos y Materias', icon: <GroupIcon />, path: '/grupos-materias', roles: ['admin'] },
     { text: 'Usuarios', icon: <PersonIcon />, path: '/usuarios', roles: ['admin'] },
     { text: 'Logs', icon: <ArticleIcon />, path: '/logs', roles: ['admin', 'operator', 'auditor'] },

@@ -34,19 +34,22 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [estudiantesRes, inscripcionesRes] = await Promise.all([
-          api.get('/estudiantes'),
-          api.get('/boletas')
+        const [estudiantesStatsRes, boletasStatsRes] = await Promise.all([
+          api.get('/estudiantes/stats'),
+          api.get('/boletas/stats')
         ])
 
-        const estudiantes = Array.isArray(estudiantesRes.data) ? estudiantesRes.data : []
-        const inscripciones = Array.isArray(inscripcionesRes.data) ? inscripcionesRes.data : []
+        const estudiantesStats = estudiantesStatsRes.data
+        const boletasStats = boletasStatsRes.data
 
         setStats({
-          totalEstudiantes: estudiantes.length,
-          totalInscripciones: inscripciones.length,
-          inscripcionesCompletadas: inscripciones.filter(i => i.estado === 'completado').length,
-          inscripcionesPendientes: inscripciones.filter(i => ['pendiente', 'confirmado', 'procesando'].includes(i.estado)).length,
+          totalEstudiantes: estudiantesStats.total || 0,
+          totalInscripciones: boletasStats.total || 0,
+          inscripcionesCompletadas: boletasStats.porEstado?.completado || 0,
+          inscripcionesPendientes: 
+            (boletasStats.porEstado?.pendiente || 0) +
+            (boletasStats.porEstado?.confirmado || 0) +
+            (boletasStats.porEstado?.procesando || 0),
         })
       } catch (error) {
         console.error('Error al obtener estadísticas:', error)

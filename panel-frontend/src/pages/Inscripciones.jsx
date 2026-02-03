@@ -3,10 +3,10 @@ import {
   Box, Typography, Paper, Chip, IconButton, Dialog, DialogTitle, 
   DialogContent, DialogActions, Button, Grid, Table, TableBody, 
   TableCell, TableContainer, TableHead, TableRow, Select, MenuItem,
-  FormControl, InputLabel, Alert
+  FormControl, InputLabel, Alert, TextField
 } from '@mui/material'
 import { DataGrid, esES } from '@mui/x-data-grid'
-import { Visibility as VisibilityIcon } from '@mui/icons-material'
+import { Visibility as VisibilityIcon, FilterList as FilterListIcon, Clear as ClearIcon } from '@mui/icons-material'
 import api from '../api/axios'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -30,12 +30,24 @@ const Inscripciones = () => {
   const [newEstado, setNewEstado] = useState('')
   const { user } = useAuth()
 
+  // Filtros
+  const [filters, setFilters] = useState({
+    search: '',
+    estado: '',
+  })
+  const [showFilters, setShowFilters] = useState(false)
+
   const canChangeEstado = user?.role === 'admin' || user?.role === 'operator'
 
   useEffect(() => {
     const fetchInscripciones = async () => {
       try {
-        const response = await api.get('/boletas')
+        // Construir query params
+        const params = new URLSearchParams()
+        if (filters.search) params.append('search', filters.search)
+        if (filters.estado) params.append('estado', filters.estado)
+        
+        const response = await api.get(`/boletas?${params.toString()}`)
         const inscripcionesData = response.data?.data || response.data
         setInscripciones(Array.isArray(inscripcionesData) ? inscripcionesData : [])
       } catch (error) {
@@ -49,7 +61,7 @@ const Inscripciones = () => {
     const interval = setInterval(fetchInscripciones, 30000) // Poll cada 30s
 
     return () => clearInterval(interval)
-  }, [])
+  }, [filters])
 
   const handleViewDetail = async (id) => {
     setDetailLoading(true)
@@ -159,9 +171,63 @@ const Inscripciones = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Inscripciones (Boletas)
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          Inscripciones (Boletas)
+        </Typography>
+        <Button
+          variant={showFilters ? "contained" : "outlined"}
+          startIcon={showFilters ? <ClearIcon /> : <FilterListIcon />}
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+        </Button>
+      </Box>
+
+      {/* Panel de Filtros */}
+      {showFilters && (
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Buscar (Registro o Nombre)"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                placeholder="Ej: 222009969 o SONCO"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth>
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={filters.estado}
+                  label="Estado"
+                  onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+                >
+                  <MenuItem value="">Todos</MenuItem>
+                  <MenuItem value="pendiente">Pendiente</MenuItem>
+                  <MenuItem value="confirmado">Confirmado</MenuItem>
+                  <MenuItem value="procesando">Procesando</MenuItem>
+                  <MenuItem value="completado">Completado</MenuItem>
+                  <MenuItem value="error">Error</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => setFilters({ search: '', estado: '' })}
+                sx={{ height: '56px' }}
+              >
+                Limpiar
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+      )}
+
       <Paper sx={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={inscripciones}

@@ -9,6 +9,7 @@ import GruposMaterias from '../pages/GruposMaterias'
 import Usuarios from '../pages/Usuarios'
 import Logs from '../pages/Logs'
 import Semillas from '../pages/Semillas'
+import BotMonitor from '../pages/BotMonitor'
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, hasRole, loading } = useAuth()
@@ -54,6 +55,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="logs" element={<Logs />} />
+        <Route path="bot-monitor" element={<BotMonitor />} />
         <Route path="semillas" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <Semillas />
