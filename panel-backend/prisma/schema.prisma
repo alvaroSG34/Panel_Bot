@@ -68,6 +68,7 @@ model boletas_inscripciones {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// Bot heartbeat status tracking
 model bot_heartbeat {
   id              Int       @id @default(1)
   ultima_conexion DateTime? @db.Timestamp(6)
@@ -76,6 +77,7 @@ model bot_heartbeat {
   pid             Int?
   hostname        String?   @db.VarChar(255)
   grupos_cache    Json?
+  queue_stats     Json?
   actualizado_en  DateTime  @default(now()) @db.Timestamp(6)
 }
 

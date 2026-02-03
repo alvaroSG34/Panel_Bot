@@ -14,6 +14,7 @@ import { AdminCommandsModule } from './modules/admin-commands/admin-commands.mod
 import { BotStatusModule } from './modules/bot-status/bot-status.module';
 import { LogsModule } from './modules/logs/logs.module';
 import { SeedingModule } from './modules/seeding/seeding.module';
+import { TestingModule } from './modules/testing/testing.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard, SessionGuard } from './common/guards';
 import { AuditInterceptor } from './common/interceptors';
@@ -39,6 +40,7 @@ import { AuditInterceptor } from './common/interceptors';
     BotStatusModule,
     LogsModule,
     SeedingModule,
+    TestingModule,
   ],
   controllers: [AppController],
   providers: [

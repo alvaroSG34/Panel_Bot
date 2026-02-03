@@ -20,4 +20,14 @@ export class UpdateHeartbeatDto {
   @IsObject()
   @IsOptional()
   grupos_cache?: Record<string, any>;
+
+  @IsObject()
+  @IsOptional()
+  queueStats?: {
+    jobsPending: number;
+    jobsProcessing: number;
+    notificationsPending: number;
+    totalCompleted: number;
+    totalFailed: number;
+  };
 }
