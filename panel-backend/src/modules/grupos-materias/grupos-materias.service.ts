@@ -321,6 +321,12 @@ export class GruposMateriasService {
   }
 
   // ==================== MAPEOS ====================
+  async getAllSemestres() {
+    return this.prisma.semestres.findMany({
+      orderBy: { codigo: 'desc' },
+    });
+  }
+
   async getAllMapeos() {
     return this.prisma.grupo_materia.findMany({
       include: {

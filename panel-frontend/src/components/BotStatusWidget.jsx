@@ -9,7 +9,7 @@ const BotStatusWidget = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await api.get('/bot-status')
+        const response = await api.get('/bot/status')
         setStatus(response.data)
       } catch (error) {
         console.error('Error al obtener estado del bot:', error)

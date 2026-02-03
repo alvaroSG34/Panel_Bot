@@ -59,9 +59,26 @@ export class GruposMateriasController {
   }
 
   // ==================== MAPEOS ====================
+  @Get('semestres')
+  getAllSemestres() {
+    return this.gruposMateriasService.getAllSemestres();
+  }
+
   @Get('mapeos')
   getAllMapeos() {
     return this.gruposMateriasService.getAllMapeos();
+  }
+
+  @Post('mapeos')
+  @Roles('admin')
+  createMapeo(@Body() createDto: CreateGrupoMateriaDto) {
+    return this.gruposMateriasService.create(createDto);
+  }
+
+  @Delete('mapeos/:id')
+  @Roles('admin')
+  deleteMapeo(@Param('id', ParseIntPipe) id: number) {
+    return this.gruposMateriasService.remove(id);
   }
 
   @Get()

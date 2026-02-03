@@ -39,8 +39,8 @@ const Dashboard = () => {
           api.get('/boletas')
         ])
 
-        const estudiantes = estudiantesRes.data
-        const inscripciones = inscripcionesRes.data
+        const estudiantes = Array.isArray(estudiantesRes.data) ? estudiantesRes.data : []
+        const inscripciones = Array.isArray(inscripcionesRes.data) ? inscripcionesRes.data : []
 
         setStats({
           totalEstudiantes: estudiantes.length,

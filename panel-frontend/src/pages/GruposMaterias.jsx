@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, Typography, Paper, Tabs, Tab, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton } from '@mui/material'
+import { Box, Typography, Paper, Tabs, Tab, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, MenuItem } from '@mui/material'
 import { DataGrid, esES } from '@mui/x-data-grid'
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import api from '../api/axios'
@@ -9,13 +9,23 @@ const GruposMaterias = () => {
   const [materias, setMaterias] = useState([])
   const [grupos, setGrupos] = useState([])
   const [mapeos, setMapeos] = useState([])
+  const [semestres, setSemestres] = useState([])
   const [loading, setLoading] = useState(true)
   
   // Dialogs
   const [openMateriaDialog, setOpenMateriaDialog] = useState(false)
   const [openGrupoDialog, setOpenGrupoDialog] = useState(false)
+  const [openMapeoDialog, setOpenMapeoDialog] = useState(false)
   const [materiaForm, setMateriaForm] = useState({ codigo_materia: '', nombre_materia: '' })
   const [grupoForm, setGrupoForm] = useState({ codigo_grupo: '' })
+  const [mapeoForm, setMapeoForm] = useState({ 
+    id_semestre: '', 
+    id_materia: '', 
+    id_grupo: '', 
+    jid_grupo_whatsapp: '',
+    modalidad: '',
+    horario: ''
+  })
 
   useEffect(() => {
     fetchData()
@@ -25,14 +35,21 @@ const GruposMaterias = () => {
 
   const fetchData = async () => {
     try {
-      const [materiasRes, gruposRes, mapeosRes] = await Promise.all([
+      const [materiasRes, gruposRes, mapeosRes, semestresRes] = await Promise.all([
         api.get('/grupos-materias/materias'),
         api.get('/grupos-materias/grupos'),
-        api.get('/grupos-materias/mapeos')
+        api.get('/grupos-materias/mapeos'),
+        api.get('/grupos-materias/semestres')
       ])
-      setMaterias(materiasRes.data)
-      setGrupos(gruposRes.data)
-      setMapeos(mapeosRes.data)
+      const materiasData = materiasRes.data?.data || materiasRes.data
+      const gruposData = gruposRes.data?.data || gruposRes.data
+      const mapeosData = mapeosRes.data?.data || mapeosRes.data
+      const semestresData = semestresRes.data?.data || semestresRes.data
+      
+      setMaterias(Array.isArray(materiasData) ? materiasData : [])
+      setGrupos(Array.isArray(gruposData) ? gruposData : [])
+      setMapeos(Array.isArray(mapeosData) ? mapeosData : [])
+      setSemestres(Array.isArray(semestresData) ? semestresData : [])
     } catch (error) {
       console.error('Error al obtener datos:', error)
     } finally {
@@ -80,6 +97,35 @@ const GruposMaterias = () => {
         fetchData()
       } catch (error) {
         alert(error.response?.data?.message || 'Error al eliminar grupo')
+      }
+    }
+  }
+
+  const handleCreateMapeo = async () => {
+    try {
+      await api.post('/grupos-materias/mapeos', {
+        id_semestre: parseInt(mapeoForm.id_semestre),
+        id_materia: parseInt(mapeoForm.id_materia),
+        id_grupo: parseInt(mapeoForm.id_grupo),
+        jid_grupo_whatsapp: mapeoForm.jid_grupo_whatsapp,
+        modalidad: mapeoForm.modalidad || undefined,
+        horario: mapeoForm.horario || undefined
+      })
+      setOpenMapeoDialog(false)
+      setMapeoForm({ id_semestre: '', id_materia: '', id_grupo: '', jid_grupo_whatsapp: '', modalidad: '', horario: '' })
+      fetchData()
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error al crear mapeo')
+    }
+  }
+
+  const handleDeleteMapeo = async (id) => {
+    if (window.confirm('¿Está seguro de eliminar este mapeo?')) {
+      try {
+        await api.delete(`/grupos-materias/mapeos/${id}`)
+        fetchData()
+      } catch (error) {
+        alert(error.response?.data?.message || 'Error al eliminar mapeo')
       }
     }
   }
@@ -153,6 +199,17 @@ const GruposMaterias = () => {
       width: 120,
       valueGetter: (params) => params.row.semestres?.codigo
     },
+    {
+      field: 'acciones',
+      headerName: 'Acciones',
+      width: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <IconButton size="small" onClick={() => handleDeleteMapeo(params.row.id)} color="error">
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      ),
+    },
   ]
 
   return (
@@ -212,18 +269,25 @@ const GruposMaterias = () => {
             </>
           )}
           {tab === 2 && (
-            <Box sx={{ height: 600 }}>
-              <DataGrid
-                rows={mapeos}
-                columns={mapeosColumns}
-                pageSize={10}
-                rowsPerPageOptions={[10, 25, 50]}
-                loading={loading}
-                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                disableSelectionOnClick
-                sx={{ border: 'none' }}
-              />
-            </Box>
+            <>
+              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenMapeoDialog(true)}>
+                  Nuevo Mapeo
+                </Button>
+              </Box>
+              <Box sx={{ height: 600 }}>
+                <DataGrid
+                  rows={mapeos}
+                  columns={mapeosColumns}
+                  pageSize={10}
+                  rowsPerPageOptions={[10, 25, 50]}
+                  loading={loading}
+                  localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                  disableSelectionOnClick
+                  sx={{ border: 'none' }}
+                />
+              </Box>
+            </>
           )}
         </Box>
       </Paper>
@@ -275,6 +339,92 @@ const GruposMaterias = () => {
         <DialogActions>
           <Button onClick={() => setOpenGrupoDialog(false)}>Cancelar</Button>
           <Button onClick={handleCreateGrupo} variant="contained" disabled={!grupoForm.codigo_grupo}>
+            Crear
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para crear mapeo */}
+      <Dialog open={openMapeoDialog} onClose={() => setOpenMapeoDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Nuevo Mapeo Materia-Grupo-WhatsApp</DialogTitle>
+        <DialogContent>
+          <TextField
+            select
+            margin="dense"
+            label="Semestre"
+            fullWidth
+            value={mapeoForm.id_semestre}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, id_semestre: e.target.value })}
+          >
+            {semestres.map((sem) => (
+              <MenuItem key={sem.id} value={sem.id}>
+                {sem.codigo} - {sem.nombre || 'Sin nombre'}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            margin="dense"
+            label="Materia"
+            fullWidth
+            value={mapeoForm.id_materia}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, id_materia: e.target.value })}
+          >
+            {materias.map((mat) => (
+              <MenuItem key={mat.id} value={mat.id}>
+                {mat.codigo_materia} - {mat.nombre}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            margin="dense"
+            label="Grupo"
+            fullWidth
+            value={mapeoForm.id_grupo}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, id_grupo: e.target.value })}
+          >
+            {grupos.map((grp) => (
+              <MenuItem key={grp.id} value={grp.id}>
+                {grp.codigo_grupo}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            margin="dense"
+            label="WhatsApp Group JID"
+            fullWidth
+            value={mapeoForm.jid_grupo_whatsapp}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, jid_grupo_whatsapp: e.target.value })}
+            placeholder="Ej: 120363123456789012@g.us"
+            helperText="ID del grupo de WhatsApp (obtenible con npm run discover-groups)"
+          />
+          <TextField
+            margin="dense"
+            label="Modalidad (Opcional)"
+            fullWidth
+            value={mapeoForm.modalidad}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, modalidad: e.target.value })}
+            placeholder="Ej: Presencial, Virtual"
+          />
+          <TextField
+            margin="dense"
+            label="Horario (Opcional)"
+            fullWidth
+            multiline
+            rows={2}
+            value={mapeoForm.horario}
+            onChange={(e) => setMapeoForm({ ...mapeoForm, horario: e.target.value })}
+            placeholder="Ej: Lunes y Miércoles 14:30-16:00"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenMapeoDialog(false)}>Cancelar</Button>
+          <Button 
+            onClick={handleCreateMapeo} 
+            variant="contained" 
+            disabled={!mapeoForm.id_semestre || !mapeoForm.id_materia || !mapeoForm.id_grupo || !mapeoForm.jid_grupo_whatsapp}
+          >
             Crear
           </Button>
         </DialogActions>

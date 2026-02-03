@@ -10,9 +10,10 @@ const Usuarios = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
   const [formData, setFormData] = useState({
-    nombre_usuario: '',
-    contraseña: '',
-    rol: 'operator'
+    username: '',
+    password: '',
+    email: '',
+    role: 'operator'
   })
 
   useEffect(() => {
@@ -24,7 +25,9 @@ const Usuarios = () => {
   const fetchUsuarios = async () => {
     try {
       const response = await api.get('/usuarios')
-      setUsuarios(response.data)
+      // Si la respuesta tiene un objeto con data, extraerlo; si no, usar la respuesta directamente
+      const usuariosData = response.data?.data || response.data
+      setUsuarios(Array.isArray(usuariosData) ? usuariosData : [])
     } catch (error) {
       console.error('Error al obtener usuarios:', error)
     } finally {
@@ -36,16 +39,18 @@ const Usuarios = () => {
     if (user) {
       setEditingUser(user)
       setFormData({
-        nombre_usuario: user.nombre_usuario,
-        contraseña: '',
-        rol: user.rol
+        username: user.username,
+        password: '',
+        email: user.email || '',
+        role: user.role
       })
     } else {
       setEditingUser(null)
       setFormData({
-        nombre_usuario: '',
-        contraseña: '',
-        rol: 'operator'
+        username: '',
+        password: '',
+        email: '',
+        role: 'operator'
       })
     }
     setOpenDialog(true)
@@ -60,8 +65,8 @@ const Usuarios = () => {
     try {
       if (editingUser) {
         const updateData = { ...formData }
-        if (!updateData.contraseña) {
-          delete updateData.contraseña
+        if (!updateData.password) {
+          delete updateData.password
         }
         await api.put(`/usuarios/${editingUser.id}`, updateData)
       } else {
@@ -88,9 +93,10 @@ const Usuarios = () => {
   }
 
   const columns = [
-    { field: 'nombre_usuario', headerName: 'Usuario', width: 200 },
+    { field: 'username', headerName: 'Usuario', width: 200 },
+    { field: 'email', headerName: 'Email', width: 200 },
     { 
-      field: 'rol', 
+      field: 'role', 
       headerName: 'Rol', 
       width: 130,
       renderCell: (params) => {
@@ -164,17 +170,25 @@ const Usuarios = () => {
             margin="dense"
             label="Nombre de Usuario"
             fullWidth
-            value={formData.nombre_usuario}
-            onChange={(e) => setFormData({ ...formData, nombre_usuario: e.target.value })}
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             disabled={!!editingUser}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            type="email"
+            fullWidth
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
           <TextField
             margin="dense"
             label={editingUser ? 'Nueva Contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
             type="password"
             fullWidth
-            value={formData.contraseña}
-            onChange={(e) => setFormData({ ...formData, contraseña: e.target.value })}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required={!editingUser}
           />
           <TextField
@@ -182,8 +196,8 @@ const Usuarios = () => {
             margin="dense"
             label="Rol"
             fullWidth
-            value={formData.rol}
-            onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           >
             <MenuItem value="admin">Administrador</MenuItem>
             <MenuItem value="operator">Operador</MenuItem>
